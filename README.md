@@ -6,6 +6,15 @@ Use "FileReplacerUtils::destroyInstance()" to destroy the instance.
 	See fs_default_os_wrapper.h to wrap the async FS functions
 	See fs_sync_wrapper to use sync fs functions
 
-## Requirements:
-- At first, you need a copy of the [dynamic_libs](https://github.com/Maschell/dynamic_libs) in your src/dynamic_libs folder.
-- To able to log something, you need the right [logger functions](https://github.com/Maschell/SDCafiine/blob/master/src/utils/).
+
+Link the application with:
+```
+-lfswrapper -lutils -ldynamiclibs 
+```
+
+## Dependencies
+To be able to use libfswrapper, you need to install the following dependencies:
+
+- Application needs to be loaded from the [homebrew_launcher](https://github.com/dimok789/homebrew_launcher)
+- [libutils](https://github.com/Maschell/libutils) for common functions.
+- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.

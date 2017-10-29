@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+#include <utils/logger.h>
+
 #include "fs_default_os_wrapper.h"
-#include "utils/logger.h"
 
 int fs_default_os_wrapper_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
+#include <utils/logger.h>
 
 #include "fs_wrapper_utils.h"
 #include "fs_async_wrapper.h"
-#include "utils/logger.h"
 
 typedef int (*FallbackHelperInternal)(FallbackParamWrapper*, OSAsyncParamWrapper *);
 

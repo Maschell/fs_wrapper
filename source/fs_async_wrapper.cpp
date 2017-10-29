@@ -19,9 +19,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <utils/logger.h>
 
 #include "fs_async_wrapper.h"
-#include "utils/logger.h"
 
 //Wii U fails to allocate memory if we do the functions async. =/
 #define DO_REAL_ASYNC       0

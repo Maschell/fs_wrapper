@@ -24,10 +24,11 @@
 extern "C" {
 #endif
 
-#include "fs_sync_wrapper.h"
-#include "dynamic_libs/fs_defs.h"
-#include "dynamic_libs/fs_functions.h"
+#include <dynamic_libs/fs_defs.h>
+#include <dynamic_libs/fs_functions.h>
 #include <unistd.h>
+
+#include "fs_sync_wrapper.h"
 
 typedef int (*FSAsyncFallback)(void * params);
 

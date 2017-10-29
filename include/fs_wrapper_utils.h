@@ -15,40 +15,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef __FS_SYNC_WRAPPER_H_
-#define __FS_SYNC_WRAPPER_H_
-
-#include "FileReplacerUtils.h"
-
-#include "dynamic_libs/fs_defs.h"
-#include "dynamic_libs/fs_functions.h"
-#include <unistd.h>
-
+#ifndef __FS_WRAPPER_UTILS_H_
+#define __FS_WRAPPER_UTILS_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int fs_wrapper_FSCloseFile(int handle);
+#include <dynamic_libs/fs_defs.h>
+#include <dynamic_libs/fs_functions.h>
+#include <unistd.h>
 
-int fs_wrapper_FSGetPosFile(int handle,int * pos);
+    int fallbackFSCloseFileAsync(void * fallbackparams);
 
-int fs_wrapper_FSGetStat(const char * path, FSStat * stats);
+    int fallbackFSGetPosFileAsync(void * fallbackparams);
 
-int fs_wrapper_FSGetStatFile(int handle, FSStat * stats);
+    int fallbackFSGetStatAsync(void * fallbackparams);
 
-int fs_wrapper_FSIsEof(int handle);
+    int fallbackFSGetStatFileAsync(void * fallbackparams);
 
-int fs_wrapper_FSOpenFile(const char * path, const char * mode, int * handle);
+    int fallbackFSFSGetPosFileAsync(void * fallbackparams);
 
-int fs_wrapper_FSReadFile(int handle,void *buffer,size_t size,size_t count);
+    int fallbackFSIsEofAsync(void * fallbackparams);
 
-int fs_wrapper_FSReadFileWithPos(void *buffer, int size, int count, u32 pos, int handle);
+    int fallbackFSOpenFileAsync(void * fallbackparams);
 
-int fs_wrapper_FSSetPosFile(int handle,u32 pos);
+    int fallbackFSReadFileAsync(void * fallbackparams);
+
+    int fallbackFSReadFileWithPosAsync(void * fallbackparams);
+
+    int fallbackFSSetPosFileAsync(void * fallbackparams);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __FS_SYNC_WRAPPER_H_
+#endif // __FS_WRAPPER_UTILS_H_

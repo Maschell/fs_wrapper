@@ -19,10 +19,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <utils/logger.h>
 
 #include "fs_sync_wrapper.h"
 #include "fs_retain_vars.h"
-#include "utils/logger.h"
 
 int fs_wrapper_FSCloseFile(int handle){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }

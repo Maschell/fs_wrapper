@@ -15,12 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#include <gctypes.h>
-#include "fs_retain_vars.h"
+#ifndef FS_RETAINS_VARS_H_
+#define FS_RETAINS_VARS_H_
 
-OSMessageQueue fsFSQueue __attribute__((section(".data")));
-OSMessage fsFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
+#include <dynamic_libs/fs_defs.h>
+#include <dynamic_libs/os_types.h>
 
-FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
-u8 fsAsyncResultCacheLock __attribute__((section(".data"))) = 0;
-u8 fsAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+#define ASYNC_RESULT_CACHE_SIZE     50
+#define FS_QUEUE_MESSAGE_COUNT      5
+
+extern OSMessageQueue fsFSQueue __attribute__((section(".data")));
+extern OSMessage fsFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
+
+extern FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE];
+
+extern u8 fsAsyncResultCacheLock;
+extern u8 fsAsyncResultCacheCur;
+
+#endif // FS_RETAINS_VARS_H_

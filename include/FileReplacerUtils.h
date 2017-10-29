@@ -21,11 +21,11 @@
 #include <vector>
 #include <algorithm>
 
-#include "fs_retain_vars.h"
+#include <dynamic_libs/fs_defs.h>
+#include <dynamic_libs/os_types.h>
+#include <system/CThread.h>
 
-#include "dynamic_libs/fs_defs.h"
-#include "dynamic_libs/os_types.h"
-#include "system/OSThread.h"
+#include "fs_retain_vars.h"
 
 #define CHECKED_WITH_ALL_ERRORS     0x10000
 #define CHECKED_MASK                0x01000
