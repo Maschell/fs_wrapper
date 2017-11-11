@@ -12,6 +12,12 @@ Link the application with:
 -lfswrapper -lutils -ldynamiclibs 
 ```
 
+You also need to add the include path to your Makefile. Example:
+
+```
+export INCLUDE	:= [...] -I$(PORTLIBS)/include
+```
+
 ## Dependencies
 To be able to use libfswrapper, you need to install the following dependencies:
 
