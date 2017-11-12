@@ -15,7 +15,7 @@ Link the application with:
 You also need to add the include path to your Makefile. Example:
 
 ```
-export INCLUDE	:= [...] -I$(PORTLIBS)/include
+export INCLUDE	:= [...] -I$(PORTLIBS)/include -I$(PORTLIBS)/include/libfswrapper
 ```
 
 ## Dependencies
