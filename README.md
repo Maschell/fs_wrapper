@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Maschell/fs_wrapper.svg?branch=master)](https://travis-ci.org/Maschell/fs_wrapper)  
+
 TODO
 
 Use "FileReplacerUtils::destroyInstance()" to destroy the instance.
