@@ -141,7 +141,7 @@ int fs_wrapper_FSReadFile(int handle,void *buffer,size_t size, size_t count){
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
         result = read(handle, buffer,size*count);
-        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size,handle,result);
+        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size*count,handle,result);
     }
     return result;
 }
@@ -152,7 +152,7 @@ int fs_wrapper_FSReadFileWithPos(void *buffer, int size, int count, u32 pos, int
     if(FileReplacerUtils::hasFileHandle(handle)){
         lseek(handle, pos, SEEK_SET);//TODO check for lseek result.
         result = read(handle, buffer,size*count);
-        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X at pos %08X. result %08X \n",size,handle,pos,result);
+        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X at pos %08X. result %08X \n",size*count,handle,pos,result);
     }
     return result;
 }
