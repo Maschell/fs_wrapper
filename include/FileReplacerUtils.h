@@ -103,6 +103,24 @@ class FileReplacerUtils{
             return true;
         }
 
+        static bool setGroupAndOwnerID(){
+            int mcpHandle = MCP_Open();
+            if(mcpHandle != 0)
+            {
+                unsigned char titleInfo[0x80];
+                memset(titleInfo, 0, sizeof(titleInfo));
+
+                MCP_GetOwnTitleInfo(mcpHandle, titleInfo);
+                MCP_Close(mcpHandle);
+                u32 * test = (u32*)titleInfo;
+                global_owner_id = test[1];
+                global_group_id = test[2];
+                DEBUG_FUNCTION_LINE("Set group_id to %08X and owner_id to %08X\n",global_group_id,global_owner_id);
+                return true;
+            }
+            return false;
+        }
+
         static void sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status);
 
         void StartAsyncThread();

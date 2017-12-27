@@ -23,3 +23,6 @@ OSMessage fsFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".dat
 FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
 u8 fsAsyncResultCacheLock __attribute__((section(".data"))) = 0;
 u8 fsAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+
+u32 global_owner_id __attribute__((section(".data"))) = 0;
+u32 global_group_id __attribute__((section(".data"))) = 0;

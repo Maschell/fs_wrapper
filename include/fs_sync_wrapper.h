@@ -43,7 +43,7 @@ int fs_wrapper_FSOpenFile(const char * path, const char * mode, int * handle);
 
 int fs_wrapper_FSReadFile(int handle,void *buffer,size_t size,size_t count);
 
-int fs_wrapper_FSReadFileWithPos(void *buffer, int size, int count, u32 pos, int handle);
+int fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, u32 pos, int handle);
 
 int fs_wrapper_FSSetPosFile(int handle,u32 pos);
 

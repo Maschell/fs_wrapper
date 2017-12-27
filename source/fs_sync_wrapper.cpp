@@ -38,7 +38,7 @@ int fs_wrapper_FSCloseFile(int handle){
 int fs_wrapper_FSGetPosFile(int handle,int * pos){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     if(FileReplacerUtils::hasFileHandle(handle)){
-        int currentPos = lseek(handle, (size_t)0, SEEK_CUR);
+        off_t currentPos = lseek(handle, (off_t)0, SEEK_CUR);
         *pos = currentPos;
 
         DEBUG_FUNCTION_LINE("pos %08X for handle %08X\n",*pos,handle);
@@ -46,6 +46,19 @@ int fs_wrapper_FSGetPosFile(int handle,int * pos){
         return FS_STATUS_OK;
     }
     return USE_OS_FS_FUNCTION;
+}
+
+void setCommonStats(FSStat * stats){
+    if(stats == NULL){
+        DEBUG_FUNCTION_LINE("STATS EMPTY\n");
+    }
+    stats->permission = 0x00000400;
+    stats->owner_id = global_owner_id;
+    stats->group_id = global_group_id;
+    stats->flag |= 0x08000000;
+    stats->flag |= 0x04000000;
+    stats->ctime = 0x0003E8C3E677A740L;
+    stats->mtime = 0x0003F8AABBEAFBC0L;
 }
 
 int fs_wrapper_FSGetStat(const char * path, FSStat * stats){
@@ -61,14 +74,14 @@ int fs_wrapper_FSGetStat(const char * path, FSStat * stats){
             DEBUG_FUNCTION_LINE("success! path %s\n",path);
             stats->flag = 0;
             if(S_ISDIR(path_stat.st_mode)){
-                stats->flag |= 0;
+                stats->flag |= 0x80000000;
+                DEBUG_FUNCTION_LINE("set stats->flag: DIR\n");
+            }else{
+                stats->size = path_stat.st_size;
+                DEBUG_FUNCTION_LINE("stats->size: %08X\n",stats->size);
             }
 
-            stats->size = path_stat.st_size;
-
-            //Values copied from my console while loading SSBU. Maybe doesn't work with all games/consoles/regions?
-            stats->permission = 0x00000444;
-            stats->owner_id = 0x10053000;
+            setCommonStats(stats);
 
             result = FS_STATUS_OK;
         }
@@ -87,9 +100,8 @@ int fs_wrapper_FSGetStatFile(int handle, FSStat * stats){
 
         stats->size = path_stat.st_size;
         stats->flag = 0;
-        //Values copied from my console while loading SSBU. Maybe doesn't work with all games/consoles/regions?
-        stats->permission = 0x00000444;
-        stats->owner_id = 0x10053000;
+
+        setCommonStats(stats);
 
         DEBUG_FUNCTION_LINE("success! handle: %08X size: %08X\n",handle,stats->size);
 
@@ -136,23 +148,62 @@ int fs_wrapper_FSOpenFile(const char * path, const char * mode, int * handle){
     return result;
 }
 
+#define MAXIMUM_READ_CHUNK 1024*1024
+
+static int readIntoBuffer(int handle,void *buffer,size_t size, size_t count){
+    int sizeToRead = size*count;
+    void * newBuffer = buffer;
+    int curResult = -1;
+    int totalSize = 0;
+    int toRead = 0;
+    while(sizeToRead > 0){
+        if(sizeToRead < MAXIMUM_READ_CHUNK){
+            toRead = sizeToRead;
+        }else{
+            toRead = MAXIMUM_READ_CHUNK;
+        }
+        curResult = read(handle, newBuffer,toRead);
+        if(curResult < 0){
+            DEBUG_FUNCTION_LINE("Error: Reading %08X bytes from handle %08X. result %08X \n",size*count,handle,curResult);
+            return -1;
+        }
+        if(curResult == 0 ){
+            //EOF
+            break;
+        }
+        newBuffer = (void*)(((u32)newBuffer) + curResult);
+        totalSize += curResult;
+        sizeToRead -= curResult;
+        if(toRead == curResult){
+            break;
+        }
+        DEBUG_FUNCTION_LINE("Reading. missing %d\n",sizeToRead);
+    }
+    DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size*count,handle,totalSize);
+    return totalSize;
+}
+
 int fs_wrapper_FSReadFile(int handle,void *buffer,size_t size, size_t count){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
-        result = read(handle, buffer,size*count);
-        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size*count,handle,result);
+        result = readIntoBuffer(handle,buffer,size,count);
     }
     return result;
 }
 
-int fs_wrapper_FSReadFileWithPos(void *buffer, int size, int count, u32 pos, int handle){
+int fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, u32 pos, int handle){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
-        lseek(handle, pos, SEEK_SET);//TODO check for lseek result.
-        result = read(handle, buffer,size*count);
-        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X at pos %08X. result %08X \n",size*count,handle,pos,result);
+        off_t newOffset = -1;
+        newOffset = lseek(handle, (off_t)pos, SEEK_SET);
+        if(newOffset == (off_t)pos){
+            result = readIntoBuffer(handle, buffer,size,count);
+            DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X at pos %08X. result %08X \n",size*count,handle,pos,result);
+        }else{
+            return -1;
+        }
     }
     return result;
 }
@@ -169,8 +220,8 @@ int fs_wrapper_FSSetPosFile(int handle,u32 pos){
             DEBUG_FUNCTION_LINE("Set position to %08X for handle %08X\n",pos,handle);
         }else{
             DEBUG_FUNCTION_LINE("Failed set position to %08X for handle %08X\n",pos,handle);
+            return FS_STATUS_OK;
         }
-
     }
     return result;
 }

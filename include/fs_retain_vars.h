@@ -32,4 +32,7 @@ extern FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE];
 extern u8 fsAsyncResultCacheLock;
 extern u8 fsAsyncResultCacheCur;
 
+extern u32 global_owner_id;
+extern u32 global_group_id;
+
 #endif // FS_RETAINS_VARS_H_
