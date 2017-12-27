@@ -174,12 +174,11 @@ static int readIntoBuffer(int handle,void *buffer,size_t size, size_t count){
         newBuffer = (void*)(((u32)newBuffer) + curResult);
         totalSize += curResult;
         sizeToRead -= curResult;
-        if(toRead == curResult){
-            break;
+        if(sizeToRead > 0){
+            DEBUG_FUNCTION_LINE("Reading. missing %08X bytes\n",sizeToRead);
         }
-        DEBUG_FUNCTION_LINE("Reading. missing %d\n",sizeToRead);
     }
-    DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size*count,handle,totalSize);
+    DEBUG_FUNCTION_LINE("Success: Read %08X bytes from handle %08X. result %08X \n",size*count,handle,totalSize);
     return totalSize;
 }
 
