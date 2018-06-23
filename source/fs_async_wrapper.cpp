@@ -21,12 +21,12 @@
 #include <fcntl.h>
 #include <utils/logger.h>
 
-#include "fs_async_wrapper.h"
+#include <fswrapper/fs_async_wrapper.h>
 
 //Wii U fails to allocate memory if we do the functions async. =/
 #define DO_REAL_ASYNC       0
 
-static int doFallback(CustomAsyncParamWrapper params){
+static int32_t doFallback(CustomAsyncParamWrapper params){
     if(params.fallbackFunction != NULL){
         if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Calling the fallback function %08X\n",params.fallbackFunction); }
         return ((FSAsyncFallback)params.fallbackFunction)(params.fallbackParams);
@@ -42,7 +42,7 @@ static int doFallback(CustomAsyncParamWrapper params){
     return FS_STATUS_FATAL_ERROR;
 }
 
-static int sendAsyncResult(CustomAsyncParamWrapper in, int result){
+static int32_t sendAsyncResult(CustomAsyncParamWrapper in, FSStatus result){
     FileReplacerUtils::sendAsyncCommand(in.params.params.pClient, in.params.params.pCmd, in.params.params.asyncParams, result);
 
     if(in.params.needToFreePath){
@@ -52,7 +52,7 @@ static int sendAsyncResult(CustomAsyncParamWrapper in, int result){
     return FS_STATUS_OK;
 }
 
-static int fs_wrapper_async_template(CustomAsyncParam params,FSAsyncCustomCallback callback, FSAsyncFallback fallback, void * fallbackParams){
+static int32_t fs_wrapper_async_template(CustomAsyncParam params,FSAsyncCustomCallback callback, FSAsyncFallback fallback, void * fallbackParams){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called!\n"); }
 
     CustomAsyncParamWrapper wrapper;
@@ -68,135 +68,135 @@ static int fs_wrapper_async_template(CustomAsyncParam params,FSAsyncCustomCallba
     }
 
     OSMessage message;
-    message.message = (u32) callback;
-    message.data0 = (u32) &wrapper;
+    message.message = (void*) callback;
+    message.args[0] = (uint32_t) &wrapper;
 
     FileReplacerUtils::addFSQueueMSG(&message);
 
     return FS_STATUS_OK;
 }
 
-int fs_wrapper_FSCloseFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSCloseFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSCloseFile(p->handle)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSGetPosFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSGetPosFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSGetPosFile(p->handle,p->posPtr)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSGetStatAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSGetStatAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSGetStat(p->path,p->stats)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSGetStatFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSGetStatFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSGetStatFile(p->handle,p->stats)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSIsEofAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSIsEofAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSIsEof(p->handle)) != USE_OS_FS_FUNCTION){
-       return sendAsyncResult(params,result);
+       return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSOpenFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSOpenFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSOpenFile(p->path,p->mode,p->handlePtr)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSReadFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSReadFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSReadFile(p->handle,p->buffer,p->size,p->count)) != USE_OS_FS_FUNCTION){
-       return sendAsyncResult(params,result);
+       return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSReadFileWithPosAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSReadFileWithPosAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSReadFileWithPos(p->buffer,p->size,p->count,p->pos,p->handle)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);
 }
 
-int fs_wrapper_FSSetPosFileAsyncCallback(CustomAsyncParamWrapper params){
+int32_t fs_wrapper_FSSetPosFileAsyncCallback(CustomAsyncParamWrapper params){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     //if(params == NULL){ DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n"); }
 
     OSAsyncParamWrapper * p = &(params.params.params);
 
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if((result = fs_wrapper_FSSetPosFile(p->handle,p->pos)) != USE_OS_FS_FUNCTION){
-        return sendAsyncResult(params,result);
+        return sendAsyncResult(params,(FSStatus) result);
     }
 
     return doFallback(params);

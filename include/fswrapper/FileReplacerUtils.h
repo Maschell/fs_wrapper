@@ -21,9 +21,9 @@
 #include <vector>
 #include <algorithm>
 
-#include <dynamic_libs/fs_defs.h>
-#include <dynamic_libs/os_types.h>
 #include <system/CThread.h>
+#include <coreinit/mcp.h>
+#include <utils/logger.h>
 
 #include "fs_retain_vars.h"
 
@@ -43,14 +43,14 @@ The non-async function internally call the async functions, and this way
 we avoid testing it twice.
 If the result contains our mask, we just straight to the OS functions.
 **/
-int setErrorFlag(int error);
+int32_t setErrorFlag(int32_t error);
 
 /**
 Check if we already checked the file/handle.
 Returns true if it was already checked (+ revert the error)
 Return false if it should be (tried) to be patched.
 **/
-int checkErrorFlag(int * error);
+int32_t checkErrorFlag(int32_t * error);
 
 class FileReplacerUtils{
     public:
@@ -66,53 +66,53 @@ class FileReplacerUtils{
             if(instance){
                 instance->StopAsyncThread();
                 while(instance->serverRunning){
-                    os_usleep(1000);
+                    OSSleepTicks(OSMicrosecondsToTicks(1000));
                 }
-                os_usleep(10000);
+                OSSleepTicks(OSMicrosecondsToTicks(10000));
                 delete instance;
                 instance = NULL;
             }
         }
 
-        static void addFileHandle(int handle){
+        static void addFileHandle(int32_t handle){
             getInstance()->addFileHandleInternal(handle);
         }
 
-        static void removeFileHandle(int handle){
+        static void removeFileHandle(int32_t handle){
             getInstance()->removeFileHandleInternal(handle);
         }
 
-        static bool hasFileHandle(int handle){
+        static bool hasFileHandle(int32_t handle){
             return getInstance()->hasFileHandleInternal(handle);
         }
 
-        static void addDirHandle(int handle){
+        static void addDirHandle(int32_t handle){
             getInstance()->addDirHandleInternal(handle);
         }
 
-        static void removeDirHandle(int handle){
+        static void removeDirHandle(int32_t handle){
             getInstance()->removeDirHandleInternal(handle);
         }
 
-        static bool hasDirHandle(int handle){
+        static bool hasDirHandle(int32_t handle){
             return getInstance()->hasDirHandleInternal(handle);
         }
 
         static bool addFSQueueMSG(OSMessage* message){
-            OSSendMessage(&fsFSQueue,message,OS_MESSAGE_BLOCK);
+            OSSendMessage(&fsFSQueue,message,OS_MESSAGE_FLAGS_BLOCKING);
             return true;
         }
 
         static bool setGroupAndOwnerID(){
-            int mcpHandle = MCP_Open();
+            int32_t mcpHandle = MCP_Open();
             if(mcpHandle != 0)
             {
-                unsigned char titleInfo[0x80];
-                memset(titleInfo, 0, sizeof(titleInfo));
+                MCPTitleListType titleInfo;
+                memset(&titleInfo, 0, sizeof(titleInfo));
 
-                MCP_GetOwnTitleInfo(mcpHandle, titleInfo);
+                MCP_GetOwnTitleInfo(mcpHandle, &titleInfo);
                 MCP_Close(mcpHandle);
-                u32 * test = (u32*)titleInfo;
+                uint32_t * test = (uint32_t*)&titleInfo;
                 global_owner_id = test[1];
                 global_group_id = test[2];
                 DEBUG_FUNCTION_LINE("Set group_id to %08X and owner_id to %08X\n",global_group_id,global_owner_id);
@@ -121,15 +121,15 @@ class FileReplacerUtils{
             return false;
         }
 
-        static void sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status);
+        static void sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncData* asyncParams,FSStatus status);
 
         void StartAsyncThread();
 
         void StopAsyncThread(){
             DEBUG_FUNCTION_LINE("StopAsyncThread\n");
             OSMessage message;
-            message.message = 0xDEADBEEF;
-            while(!OSSendMessage(&fsFSQueue,&message,OS_MESSAGE_NOBLOCK));
+            message.message = (void*) 0xDEADBEEF;
+            while(!OSSendMessage(&fsFSQueue,&message,OS_MESSAGE_FLAGS_NONE));
         }
 
 	private:
@@ -138,15 +138,15 @@ class FileReplacerUtils{
             DEBUG_FUNCTION_LINE("Init queue done! \n");
 	    }
 
-        void addFileHandleInternal(int handle){
+        void addFileHandleInternal(int32_t handle){
             filehandles.push_back(handle);
         }
 
-        void removeFileHandleInternal(int handle){
+        void removeFileHandleInternal(int32_t handle){
             filehandles.erase(std::remove(filehandles.begin(), filehandles.end(), handle), filehandles.end());
         }
 
-        bool hasFileHandleInternal(int handle){
+        bool hasFileHandleInternal(int32_t handle){
             if(std::find(filehandles.begin(), filehandles.end(), handle) != filehandles.end()) {
                 return true;
             } else {
@@ -154,15 +154,15 @@ class FileReplacerUtils{
             }
         }
 
-        void addDirHandleInternal(int handle){
+        void addDirHandleInternal(int32_t handle){
             dirhandles.push_back(handle);
         }
 
-        void removeDirHandleInternal(int handle){
+        void removeDirHandleInternal(int32_t handle){
             dirhandles.erase(std::remove(dirhandles.begin(), dirhandles.end(), handle), dirhandles.end());
         }
 
-        bool hasDirHandleInternal(int handle){
+        bool hasDirHandleInternal(int32_t handle){
             if(std::find(dirhandles.begin(), dirhandles.end(), handle) != dirhandles.end()) {
                 return true;
             } else {
@@ -180,8 +180,8 @@ class FileReplacerUtils{
 
         volatile bool serverRunning = false;
 
-	    std::vector<int> filehandles;
-	    std::vector<int> dirhandles;
+	    std::vector<int32_t> filehandles;
+	    std::vector<int32_t> dirhandles;
         static FileReplacerUtils * instance;
 };
 #endif // __FILE_REPLACER_UTILS_H_

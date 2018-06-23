@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include <dynamic_libs/os_types.h>
-#include "fs_retain_vars.h"
+#include <wut_types.h>
+#include <fswrapper/fs_retain_vars.h>
 
 OSMessageQueue fsFSQueue __attribute__((section(".data")));
 OSMessage fsFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
 
 FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
-u8 fsAsyncResultCacheLock __attribute__((section(".data"))) = 0;
-u8 fsAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+uint8_t fsAsyncResultCacheLock __attribute__((section(".data"))) = 0;
+uint8_t fsAsyncResultCacheCur __attribute__((section(".data"))) = 0;
 
-u32 global_owner_id __attribute__((section(".data"))) = 0;
-u32 global_group_id __attribute__((section(".data"))) = 0;
+uint32_t global_owner_id __attribute__((section(".data"))) = 0;
+uint32_t global_group_id __attribute__((section(".data"))) = 0;

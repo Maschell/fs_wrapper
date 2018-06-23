@@ -21,10 +21,10 @@
 #include <fcntl.h>
 #include <utils/logger.h>
 
-#include "fs_sync_wrapper.h"
-#include "fs_retain_vars.h"
+#include <fswrapper/fs_sync_wrapper.h>
+#include <fswrapper/fs_retain_vars.h>
 
-int fs_wrapper_FSCloseFile(int handle){
+int32_t fs_wrapper_FSCloseFile(int32_t handle){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     if(FileReplacerUtils::hasFileHandle(handle)){
         FileReplacerUtils::removeFileHandle(handle);
@@ -35,7 +35,7 @@ int fs_wrapper_FSCloseFile(int handle){
     return USE_OS_FS_FUNCTION;
 }
 
-int fs_wrapper_FSGetPosFile(int handle,int * pos){
+int32_t fs_wrapper_FSGetPosFile(int32_t handle,int32_t * pos){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     if(FileReplacerUtils::hasFileHandle(handle)){
         off_t currentPos = lseek(handle, (off_t)0, SEEK_CUR);
@@ -52,18 +52,17 @@ void setCommonStats(FSStat * stats){
     if(stats == NULL){
         DEBUG_FUNCTION_LINE("STATS EMPTY\n");
     }
-    stats->permission = 0x00000400;
-    stats->owner_id = global_owner_id;
-    stats->group_id = global_group_id;
-    stats->flag |= 0x08000000;
-    stats->flag |= 0x04000000;
-    stats->ctime = 0x0003E8C3E677A740L;
-    stats->mtime = 0x0003F8AABBEAFBC0L;
+    stats->mode = FS_MODE_READ_OWNER;
+    stats->owner = global_owner_id;
+    stats->group = global_group_id;
+    stats->flags = (FSStatFlags) ((uint32_t) FS_STAT_DIRECTORY | 0x04000000);
+    stats->created = 0x0003E8C3E677A740L;
+    stats->modified = 0x0003F8AABBEAFBC0L;
 }
 
-int fs_wrapper_FSGetStat(const char * path, FSStat * stats){
+int32_t fs_wrapper_FSGetStat(const char * path, FSStat * stats){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called!\n"); }
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if(path != NULL){
         DEBUG_FUNCTION_LINE("Searching for path %s\n",path);
         struct stat path_stat;
@@ -72,9 +71,10 @@ int fs_wrapper_FSGetStat(const char * path, FSStat * stats){
             if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("failed for path %s\n",path); }
         }else{
             DEBUG_FUNCTION_LINE("success! path %s\n",path);
-            stats->flag = 0;
+            //stats->flags = 0;
+            memset(&(stats->flags),0,sizeof(stats->flags));
             if(S_ISDIR(path_stat.st_mode)){
-                stats->flag |= 0x80000000;
+                stats->flags = (FSStatFlags) ((uint32_t) FS_STAT_DIRECTORY | (uint32_t) stats->flags); ;
                 DEBUG_FUNCTION_LINE("set stats->flag: DIR\n");
             }else{
                 stats->size = path_stat.st_size;
@@ -89,7 +89,7 @@ int fs_wrapper_FSGetStat(const char * path, FSStat * stats){
     return result;
 }
 
-int fs_wrapper_FSGetStatFile(int handle, FSStat * stats){
+int32_t fs_wrapper_FSGetStatFile(int32_t handle, FSStat * stats){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X\n",handle); }
     if(FileReplacerUtils::hasFileHandle(handle)){
         struct stat path_stat;
@@ -99,7 +99,7 @@ int fs_wrapper_FSGetStatFile(int handle, FSStat * stats){
         }
 
         stats->size = path_stat.st_size;
-        stats->flag = 0;
+        memset(&(stats->flags),0,sizeof(stats->flags));
 
         setCommonStats(stats);
 
@@ -110,15 +110,15 @@ int fs_wrapper_FSGetStatFile(int handle, FSStat * stats){
     return USE_OS_FS_FUNCTION;
 }
 
-int fs_wrapper_FSIsEof(int handle){
+int32_t fs_wrapper_FSIsEof(int32_t handle){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! handle: %08X\n",handle); }
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
         off_t currentPos = lseek(handle, (off_t) 0, SEEK_CUR);
         off_t endPos = lseek(handle, (off_t) 0, SEEK_END);
 
         if(currentPos == endPos){
-            result = FS_STATUS_EOF;
+            result = FS_STATUS_END;
         }else{
             lseek(handle, currentPos, SEEK_CUR);
             result = FS_STATUS_OK;
@@ -128,12 +128,12 @@ int fs_wrapper_FSIsEof(int handle){
     return result;
 }
 
-int fs_wrapper_FSOpenFile(const char * path, const char * mode, int * handle){
-    int result = USE_OS_FS_FUNCTION;
+int32_t fs_wrapper_FSOpenFile(const char * path, const char * mode, int32_t * handle){
+    int32_t result = USE_OS_FS_FUNCTION;
     if(path != NULL){
         result = USE_OS_FS_FUNCTION;
         DEBUG_FUNCTION_LINE("Searching for path %s\n",path);
-        int fd = open(path,O_RDONLY); //TODO: remove hardcoded mode.
+        int32_t fd = open(path,O_RDONLY); //TODO: remove hardcoded mode.
         if(fd != -1){
             DEBUG_FUNCTION_LINE("opened path: %s handle: %08X\n",path,fd);
             FileReplacerUtils::addFileHandle(fd);
@@ -150,12 +150,12 @@ int fs_wrapper_FSOpenFile(const char * path, const char * mode, int * handle){
 
 #define MAXIMUM_READ_CHUNK 1024*1024
 
-static int readIntoBuffer(int handle,void *buffer,size_t size, size_t count){
-    int sizeToRead = size*count;
+static int32_t readIntoBuffer(int32_t handle,void *buffer,size_t size, size_t count){
+    int32_t sizeToRead = size*count;
     void * newBuffer = buffer;
-    int curResult = -1;
-    int totalSize = 0;
-    int toRead = 0;
+    int32_t curResult = -1;
+    int32_t totalSize = 0;
+    int32_t toRead = 0;
     while(sizeToRead > 0){
         if(sizeToRead < MAXIMUM_READ_CHUNK){
             toRead = sizeToRead;
@@ -171,7 +171,7 @@ static int readIntoBuffer(int handle,void *buffer,size_t size, size_t count){
             //EOF
             break;
         }
-        newBuffer = (void*)(((u32)newBuffer) + curResult);
+        newBuffer = (void*)(((uint32_t)newBuffer) + curResult);
         totalSize += curResult;
         sizeToRead -= curResult;
         if(sizeToRead > 0){
@@ -182,18 +182,18 @@ static int readIntoBuffer(int handle,void *buffer,size_t size, size_t count){
     return totalSize;
 }
 
-int fs_wrapper_FSReadFile(int handle,void *buffer,size_t size, size_t count){
+int32_t fs_wrapper_FSReadFile(int32_t handle,void *buffer,size_t size, size_t count){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
         result = readIntoBuffer(handle,buffer,size,count);
     }
     return result;
 }
 
-int fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, u32 pos, int handle){
+int32_t fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, uint32_t pos, int32_t handle){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
         off_t newOffset = -1;
         newOffset = lseek(handle, (off_t)pos, SEEK_SET);
@@ -207,9 +207,9 @@ int fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, u32 po
     return result;
 }
 
-int fs_wrapper_FSSetPosFile(int handle,u32 pos){
+int32_t fs_wrapper_FSSetPosFile(int32_t handle,uint32_t pos){
     if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
-    int result = USE_OS_FS_FUNCTION;
+    int32_t result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasFileHandle(handle)){
         off_t newOffset = -1;
         result = -1;

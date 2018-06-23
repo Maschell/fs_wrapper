@@ -15,24 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-#ifndef FS_RETAINS_VARS_H_
-#define FS_RETAINS_VARS_H_
+#ifndef __FS_SYNC_WRAPPER_H_
+#define __FS_SYNC_WRAPPER_H_
 
-#include <dynamic_libs/fs_defs.h>
-#include <dynamic_libs/os_types.h>
+#include "FileReplacerUtils.h"
 
-#define ASYNC_RESULT_CACHE_SIZE     50
-#define FS_QUEUE_MESSAGE_COUNT      5
+#include <unistd.h>
 
-extern OSMessageQueue fsFSQueue __attribute__((section(".data")));
-extern OSMessage fsFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
 
-extern FSAsyncResult fsAsyncResultCache[ASYNC_RESULT_CACHE_SIZE];
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern u8 fsAsyncResultCacheLock;
-extern u8 fsAsyncResultCacheCur;
+int32_t fs_wrapper_FSCloseFile(int32_t handle);
 
-extern u32 global_owner_id;
-extern u32 global_group_id;
+int32_t fs_wrapper_FSGetPosFile(int32_t handle,int32_t * pos);
 
-#endif // FS_RETAINS_VARS_H_
+int32_t fs_wrapper_FSGetStat(const char * path, FSStat * stats);
+
+int32_t fs_wrapper_FSGetStatFile(int32_t handle, FSStat * stats);
+
+int32_t fs_wrapper_FSIsEof(int32_t handle);
+
+int32_t fs_wrapper_FSOpenFile(const char * path, const char * mode, int32_t * handle);
+
+int32_t fs_wrapper_FSReadFile(int32_t handle,void *buffer,size_t size,size_t count);
+
+int32_t fs_wrapper_FSReadFileWithPos(void *buffer, size_t size, size_t count, uint32_t pos, int32_t handle);
+
+int32_t fs_wrapper_FSSetPosFile(int32_t handle,uint32_t pos);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __FS_SYNC_WRAPPER_H_

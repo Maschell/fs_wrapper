@@ -22,29 +22,27 @@
 extern "C" {
 #endif
 
-#include <dynamic_libs/fs_defs.h>
-#include <dynamic_libs/fs_functions.h>
 #include <unistd.h>
 
-    int fallbackFSCloseFileAsync(void * fallbackparams);
+    int32_t fallbackFSCloseFileAsync(void * fallbackparams);
 
-    int fallbackFSGetPosFileAsync(void * fallbackparams);
+    int32_t fallbackFSGetPosFileAsync(void * fallbackparams);
 
-    int fallbackFSGetStatAsync(void * fallbackparams);
+    int32_t fallbackFSGetStatAsync(void * fallbackparams);
 
-    int fallbackFSGetStatFileAsync(void * fallbackparams);
+    int32_t fallbackFSGetStatFileAsync(void * fallbackparams);
 
-    int fallbackFSFSGetPosFileAsync(void * fallbackparams);
+    int32_t fallbackFSFSGetPosFileAsync(void * fallbackparams);
 
-    int fallbackFSIsEofAsync(void * fallbackparams);
+    int32_t fallbackFSIsEofAsync(void * fallbackparams);
 
-    int fallbackFSOpenFileAsync(void * fallbackparams);
+    int32_t fallbackFSOpenFileAsync(void * fallbackparams);
 
-    int fallbackFSReadFileAsync(void * fallbackparams);
+    int32_t fallbackFSReadFileAsync(void * fallbackparams);
 
-    int fallbackFSReadFileWithPosAsync(void * fallbackparams);
+    int32_t fallbackFSReadFileWithPosAsync(void * fallbackparams);
 
-    int fallbackFSSetPosFileAsync(void * fallbackparams);
+    int32_t fallbackFSSetPosFileAsync(void * fallbackparams);
 
 #ifdef __cplusplus
 }

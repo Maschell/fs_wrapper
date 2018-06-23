@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Maschell/fs_wrapper.svg?branch=master)](https://travis-ci.org/Maschell/fs_wrapper)  
+[![Build Status](https://travis-ci.org/Maschell/fs_wrapper.svg?branch=wut)](https://travis-ci.org/Maschell/fs_wrapper)
 
 TODO
 
@@ -11,18 +11,17 @@ Use "FileReplacerUtils::destroyInstance()" to destroy the instance.
 
 Link the application with:
 ```
--lfswrapper -lutils -ldynamiclibs 
+-lfswrapperwut -lutilswut -ldynamiclibs 
 ```
 
 You also need to add the include path to your Makefile. Example:
 
 ```
-export INCLUDE	:= [...] -I$(PORTLIBS)/include -I$(PORTLIBS)/include/libfswrapper
+export INCLUDE	:= [...] -I$(WUT_ROOT)/include -I$(WUT_ROOT)/include/libutilswut
 ```
 
 ## Dependencies
-To be able to use libfswrapper, you need to install the following dependencies:
+To be able to use libfswrapperwut, you need to install the following dependencies:
 
-- Application needs to be loaded from the [homebrew_launcher](https://github.com/dimok789/homebrew_launcher)
-- [libutils](https://github.com/Maschell/libutils) for common functions.
-- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
+- [wut](https://github.com/decaf-emu/wut)
+- [libutilswut](https://github.com/Maschell/libutils/tree/wut) (WUT build) for common functions.

@@ -16,20 +16,23 @@
  ****************************************************************************/
 
 #include <vector>
-#include "FileReplacerUtils.h"
-#include "fs_async_wrapper.h"
+#include <stdio.h>
+#include <string.h>
+#include <fswrapper/FileReplacerUtils.h>
+#include <fswrapper/fs_async_wrapper.h>
+#include <coreinit/mcp.h>
 
 OSMessageQueue lfFSQueue __attribute__((section(".data")));
 OSMessage lfFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
 
 FSAsyncResult lfAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
-u8 lfAsyncResultCacheLock __attribute__((section(".data"))) = 0;
-u8 lfAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+uint8_t lfAsyncResultCacheLock __attribute__((section(".data"))) = 0;
+uint8_t lfAsyncResultCacheCur __attribute__((section(".data"))) = 0;
 
 FileReplacerUtils *FileReplacerUtils::instance = NULL;
 
-int setErrorFlag(int error){
-    int result = error;
+int32_t setErrorFlag(int32_t error){
+    int32_t result = error;
     if(error == -1){
         result = CHECKED_WITH_ALL_ERRORS;
     }else{
@@ -38,7 +41,7 @@ int setErrorFlag(int error){
     return result;
 }
 
-int checkErrorFlag(int * error){
+int32_t checkErrorFlag(int32_t * error){
     if(*error == CHECKED_WITH_ALL_ERRORS){
         *error = -1;
         return true;
@@ -50,7 +53,7 @@ int checkErrorFlag(int * error){
 }
 
 void FileReplacerUtils::StartAsyncThread(){
-    s32 priority = 15;
+    int32_t priority = 15;
     this->pThread = CThread::create(DoAsyncThread, this , CThread::eAttributeAffCore2,priority);
     this->pThread->resumeThread();
 }
@@ -69,18 +72,18 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
     CustomAsyncParam cParam;
     while(true){
         if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Waiting for message\n");}
-        if(!OSReceiveMessage(&fsFSQueue,&message,OS_MESSAGE_BLOCK)){
-            os_usleep(1000);
+        if(!OSReceiveMessage(&fsFSQueue,&message,OS_MESSAGE_FLAGS_BLOCKING)){
+            OSSleepTicks(OSMicrosecondsToTicks(1000));
             continue;
         }
         if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Received message %08X\n",message.message);}
-        if(message.message == 0xDEADBEEF){
+        if((uint32_t)message.message == 0xDEADBEEF){
             DEBUG_FUNCTION_LINE("We should stop the server\n");
             break;
         }
 
         callback = (void(*)(CustomAsyncParam *))message.message;
-        CustomAsyncParam * param = (CustomAsyncParam *)message.data0;
+        CustomAsyncParam * param = (CustomAsyncParam *)message.args[0];
         memcpy(&cParam,param,sizeof(CustomAsyncParam));
         if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Calling callback at %08X, with %08X\n",callback,&cParam);}
         callback(&cParam);
@@ -90,7 +93,7 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
 
 FSAsyncResult * FileReplacerUtils::getNewAsyncParamPointer(){
     while(fsAsyncResultCacheLock){
-        os_usleep(100);
+        OSSleepTicks(OSMicrosecondsToTicks(100));
     }
     fsAsyncResultCacheLock = 1;
 
@@ -104,33 +107,32 @@ FSAsyncResult * FileReplacerUtils::getNewAsyncParamPointer(){
     return result;
 }
 
-void FileReplacerUtils::sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status){
+void FileReplacerUtils::sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncData* asyncParams,FSStatus status){
     if(asyncParams != NULL){
-        if(asyncParams->userCallback != NULL){ //Using the userCallback
-            if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("userCallback %08X userContext %08X\n",asyncParams->userCallback,asyncParams->userContext); }
-            asyncParams->userCallback(client,cmd,status,asyncParams->userContext);
+        if(asyncParams->callback != NULL){ //Using the userCallback
+            if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("userCallback %08X param %08X\n",asyncParams->callback,asyncParams->param); }
+            asyncParams->callback(client,cmd,status,asyncParams->param);
             return;
         }else if (asyncParams->ioMsgQueue != NULL){
             if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("asyncParams->ioMsgQueue %08X \n",asyncParams->ioMsgQueue); }
             FSAsyncResult * result = FileReplacerUtils::getNewAsyncParamPointer();
             FSMessage message;
-            result->userParams.userCallback = asyncParams->userCallback;
-            result->userParams.userContext = asyncParams->userContext;
-            result->userParams.ioMsgQueue = asyncParams->ioMsgQueue;
+            result->asyncData.callback = asyncParams->callback;
+            result->asyncData.param = asyncParams->param;
+            result->asyncData.ioMsgQueue = asyncParams->ioMsgQueue;
+            memset(&result->ioMsg,0,sizeof(result->ioMsg));
             result->ioMsg.data = &result;
-            result->ioMsg.unkwn1 = 0;
-            result->ioMsg.unkwn2 = 0;
-            result->ioMsg.unkwn3 = 0x08;
+            result->ioMsg.type = OS_FUNCTION_TYPE_FS_CMD_ASYNC;
             result->client = client;
             result->block = cmd;
-            result->result = status;
+            result->status = status;
+
+            memset(&message,0,sizeof(message));
 
             message.data = (void*)result;
-            message.unkwn1 = (u32)0;
-            message.unkwn2 = (u32)0;
-            message.unkwn3 = (u32)0x08;
+            message.type = OS_FUNCTION_TYPE_FS_CMD_ASYNC;
 
-            OSSendMessage(asyncParams->ioMsgQueue,(OSMessage*)&message,OS_MESSAGE_BLOCK);
+            OSSendMessage(asyncParams->ioMsgQueue,(OSMessage*)&message,OS_MESSAGE_FLAGS_BLOCKING);
         }
     }
 }

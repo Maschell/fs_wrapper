@@ -16,12 +16,12 @@
  ****************************************************************************/
 #include <utils/logger.h>
 
-#include "fs_wrapper_utils.h"
-#include "fs_async_wrapper.h"
+#include <fswrapper/fs_wrapper_utils.h>
+#include <fswrapper/fs_async_wrapper.h>
 
-typedef int (*FallbackHelperInternal)(FallbackParamWrapper*, OSAsyncParamWrapper *);
+typedef int32_t (*FallbackHelperInternal)(FallbackParamWrapper*, OSAsyncParamWrapper *);
 
-static int fallbackCaller(FallbackHelperInternal _function, void * fallbackparams){
+static int32_t fallbackCaller(FallbackHelperInternal _function, void * fallbackparams){
     FallbackParamWrapper * paramsWrapper = (FallbackParamWrapper *)fallbackparams;
     OSAsyncParamWrapper * params = &(paramsWrapper->params);
 
@@ -29,71 +29,71 @@ static int fallbackCaller(FallbackHelperInternal _function, void * fallbackparam
     return _function(paramsWrapper,params);
 }
 
-static int fallbackFSCloseFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSCloseFileAsyncCallback)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
-    real_FSCloseFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSCloseFileAsyncCallback(params->pClient, params->pCmd, params->handle, params->error,params->asyncParams);
+static int32_t fallbackFSCloseFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSCloseFileAsyncCallback)(FSClient *, FSCmdBlock *, int32_t, int32_t, FSAsyncData *);
+    real_FSCloseFileAsyncCallback = (int32_t(*)(FSClient *, FSCmdBlock *, int32_t, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSCloseFileAsyncCallback(params->pClient, params->pCmd, params->handle, params->error,params->asyncParams);
     return res;
 }
 
-static int fallbackFSGetPosFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSGetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *);
-    real_FSGetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSGetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->posPtr, params->error,params->asyncParams);
+static int32_t fallbackFSGetPosFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSGetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int32_t, int32_t *, int32_t, FSAsyncData *);
+    real_FSGetPosFileAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, int32_t, int32_t *, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSGetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->posPtr, params->error,params->asyncParams);
     return res;
 }
 
-static int fallbackFSGetStatAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSGetStatAsyncFunc)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *);
-    real_FSGetStatAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSGetStatAsyncFunc(params->pClient, params->pCmd, params->path, params->stats, params->error,params->asyncParams);
+static int32_t fallbackFSGetStatAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSGetStatAsyncFunc)(FSClient *, FSCmdBlock *, const char *, FSStat *, int32_t, FSAsyncData *);
+    real_FSGetStatAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, const char *, FSStat *, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSGetStatAsyncFunc(params->pClient, params->pCmd, params->path, params->stats, params->error,params->asyncParams);
     return res;
 }
 
-static int fallbackFSGetStatFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSGetStatFileAsyncFunc)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *);
-    real_FSGetStatFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSGetStatFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->stats, params->error,params->asyncParams);
+static int32_t fallbackFSGetStatFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSGetStatFileAsyncFunc)(FSClient *, FSCmdBlock *, int32_t, FSStat *, int32_t, FSAsyncData *);
+    real_FSGetStatFileAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, int32_t, FSStat *, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSGetStatFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->stats, params->error,params->asyncParams);
     return res;
 }
 
-static int fallbackFSIsEofAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSIsEofAsyncFunc)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
-    real_FSIsEofAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSIsEofAsyncFunc(params->pClient, params->pCmd, params->handle, params->error,params->asyncParams);
+static int32_t fallbackFSIsEofAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSIsEofAsyncFunc)(FSClient *, FSCmdBlock *, int32_t, int32_t, FSAsyncData *);
+    real_FSIsEofAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, int32_t, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSIsEofAsyncFunc(params->pClient, params->pCmd, params->handle, params->error,params->asyncParams);
     return res;
 }
 
-static int fallbackFSOpenFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSOpenFileAsyncCallback)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *);
-    real_FSOpenFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSOpenFileAsyncCallback(params->pClient, params->pCmd, params->path, params->mode, params->handlePtr, params->error, params->asyncParams);
+static int32_t fallbackFSOpenFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSOpenFileAsyncCallback)(FSClient *, FSCmdBlock *, const char *, const char *, int32_t *, int32_t, FSAsyncData *);
+    real_FSOpenFileAsyncCallback = (int32_t(*)(FSClient *, FSCmdBlock *, const char *, const char *, int32_t *, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSOpenFileAsyncCallback(params->pClient, params->pCmd, params->path, params->mode, params->handlePtr, params->error, params->asyncParams);
     return res;
 }
 
-static int fallbackFSReadFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSReadFileAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *);
-    real_FSReadFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSReadFileAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->handle, params->flag, params->error, params->asyncParams);
+static int32_t fallbackFSReadFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSReadFileAsyncFunc)(FSClient *, FSCmdBlock *, void *, int32_t, int32_t, int32_t, int32_t, int32_t, FSAsyncData *);
+    real_FSReadFileAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, void *, int32_t, int32_t, int32_t, int32_t, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSReadFileAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->handle, params->flag, params->error, params->asyncParams);
     return res;
 }
 
-static int fallbackFSReadFileWithPosAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSReadFileWithPosAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *);
-    real_FSReadFileWithPosAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSReadFileWithPosAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->pos, params->handle, params->flag, params->error, params->asyncParams);
+static int32_t fallbackFSReadFileWithPosAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSReadFileWithPosAsyncFunc)(FSClient *, FSCmdBlock *, void *, int32_t, int32_t, uint32_t, int32_t, int32_t, int32_t, FSAsyncData *);
+    real_FSReadFileWithPosAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, void *, int32_t, int32_t, uint32_t, int32_t, int32_t, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSReadFileWithPosAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->pos, params->handle, params->flag, params->error, params->asyncParams);
     return res;
 }
 
-static int fallbackFSSetPosFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
-    int (*real_FSSetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *);
-    real_FSSetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *)) paramsWrapper->realFunctionAddress;
-    int res = real_FSSetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->pos, params->error, params->asyncParams);
+static int32_t fallbackFSSetPosFileAsyncInternal(FallbackParamWrapper * paramsWrapper, OSAsyncParamWrapper * params){
+    int32_t (*real_FSSetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int32_t, uint32_t, int32_t, FSAsyncData *);
+    real_FSSetPosFileAsyncFunc = (int32_t(*)(FSClient *, FSCmdBlock *, int32_t, uint32_t, int32_t, FSAsyncData *)) paramsWrapper->realFunctionAddress;
+    int32_t res = real_FSSetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->pos, params->error, params->asyncParams);
     return res;
 }
 
 #define DEFINE_FS_FALLBACK_CALLER(name) \
-        int fallback##name(void * fallbackparams){\
+        int32_t fallback##name(void * fallbackparams){\
             return fallbackCaller(fallback##name##Internal,fallbackparams);\
         }
 

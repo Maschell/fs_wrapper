@@ -17,9 +17,9 @@
 
 #include <utils/logger.h>
 
-#include "fs_default_os_wrapper.h"
+#include <fswrapper/fs_default_os_wrapper.h>
 
-int fs_default_os_wrapper_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams * asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int32_t fd, int32_t error, FSAsyncData * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -39,7 +39,7 @@ int fs_default_os_wrapper_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, 
     return fs_wrapper_FSCloseFileAsyncEx(params,&fallbackFSCloseFileAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSGetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int *pos, int error, FSAsyncParams * asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSGetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int32_t fd, int32_t *pos, int32_t error, FSAsyncData * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -60,7 +60,7 @@ int fs_default_os_wrapper_FSGetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd,
     return fs_wrapper_FSGetPosFileAsyncEx(params,fallbackFSGetPosFileAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSGetStatAsync(const char *libPath, FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int error, FSAsyncParams * asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSGetStatAsync(const char *libPath, FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int32_t error, FSAsyncData * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -83,7 +83,7 @@ int fs_default_os_wrapper_FSGetStatAsync(const char *libPath, FSClient *pClient,
     return fs_wrapper_FSGetPosFileAsyncEx(params,fallbackFSGetStatAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSGetStatFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, FSStat * stats, int error, FSAsyncParams * asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSGetStatFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int32_t fd, FSStat * stats, int32_t error, FSAsyncData * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -104,7 +104,7 @@ int fs_default_os_wrapper_FSGetStatFileAsync(FSClient *pClient, FSCmdBlock *pCmd
     return fs_wrapper_FSGetStatFileAsyncEx(params,fallbackFSGetStatFileAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSIsEofAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams * asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSIsEofAsync(FSClient *pClient, FSCmdBlock *pCmd, int32_t fd, int32_t error, FSAsyncData * asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -124,7 +124,7 @@ int fs_default_os_wrapper_FSIsEofAsync(FSClient *pClient, FSCmdBlock *pCmd, int 
     return fs_wrapper_FSIsEofAsyncEx(params,fallbackFSIsEofAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSOpenFileAsync(const char *libpath, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error, FSAsyncParams *asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSOpenFileAsync(const char *libpath, FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int32_t *handle, int32_t error, FSAsyncData *asyncParams, void * realAddress){
 
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
@@ -149,7 +149,7 @@ int fs_default_os_wrapper_FSOpenFileAsync(const char *libpath, FSClient *pClient
     return fs_wrapper_FSOpenFileAsyncEx(params,fallbackFSOpenFileAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSReadFileAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, int fd, int flag, int error, FSAsyncParams *asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSReadFileAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int32_t size, int32_t count, int32_t fd, int32_t flag, int32_t error, FSAsyncData *asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -173,7 +173,7 @@ int fs_default_os_wrapper_FSReadFileAsync(FSClient *pClient, FSCmdBlock *pCmd, v
     return fs_wrapper_FSReadFileAsyncEx(params,fallbackFSReadFileAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSReadFileWithPosAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, u32 pos, int fd, int flag, int error, FSAsyncParams *asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSReadFileWithPosAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int32_t size, int32_t count, uint32_t pos, int32_t fd, int32_t flag, int32_t error, FSAsyncData *asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
@@ -198,7 +198,7 @@ int fs_default_os_wrapper_FSReadFileWithPosAsync(FSClient *pClient, FSCmdBlock *
     return fs_wrapper_FSReadFileWithPosAsyncEx(params,fallbackFSReadFileWithPosAsync,&paramWrapper);
 }
 
-int fs_default_os_wrapper_FSSetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, u32 pos, int error, FSAsyncParams *asyncParams, void * realAddress){
+int32_t fs_default_os_wrapper_FSSetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int32_t handle, uint32_t pos, int32_t error, FSAsyncData *asyncParams, void * realAddress){
     FallbackParamWrapper  paramWrapper;
     memset(&paramWrapper,0,sizeof(FallbackParamWrapper));
 
